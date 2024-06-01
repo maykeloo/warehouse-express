@@ -1,7 +1,6 @@
 export interface ClientDTO {
     id: string;
-    name: string | null
+    name: string | null;
     email: string;
-    role: string
+    role: string;
 }
-git
