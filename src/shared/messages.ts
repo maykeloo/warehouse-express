@@ -1,0 +1,3 @@
+export const ERROR_MESSAGES = {
+    FIELD_IS_REQUIRED: 'FIELD_IS_REQUIRED',
+};

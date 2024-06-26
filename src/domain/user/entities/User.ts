@@ -1,5 +1,5 @@
 import { validateFields } from '@/shared/utils/validateFields';
-import { Admin, Client } from '@prisma/client';
+import { User } from '@prisma/client';
 
 export enum UserRole {
     CLIENT = 'CLIENT',
@@ -7,13 +7,13 @@ export enum UserRole {
 }
 
 export class UserEntity {
-    readonly user: Client | Admin;
+    readonly user: User;
 
-    constructor(user: Client | Admin) {
+    constructor(user: User) {
         this.user = user;
     }
 
-    static validate(user: Client | Admin) {
+    static validate(user: User) {
         const requiredFields = ['email', 'password'];
         const errors = validateFields(requiredFields, { email: user.email, password: user.password });
         if (errors.length) {

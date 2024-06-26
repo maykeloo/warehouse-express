@@ -1,6 +1,7 @@
 import { IUserRepository } from '@/application/interfaces/IUserRepository';
+import { UserEntity } from '@/domain/user/entities/User';
+import { USER_ERROR_MESSAGES } from '@/domain/user/messages';
 import { PrismaClient } from '@prisma/client';
-import { UserEntity, UserRole } from '@/domain/user/entities/User';
 
 export class UserRepositoryImpl implements IUserRepository {
     private prisma: PrismaClient;
@@ -9,43 +10,68 @@ export class UserRepositoryImpl implements IUserRepository {
         this.prisma = prisma;
     }
 
-    async loginClient(userEntity: UserEntity) {
-        let role: UserRole = UserRole.CLIENT;
-        let user = await this.prisma.client.findUnique({
+    async registerUser({ user }: UserEntity) {
+        const existingClient = await this.prisma.user.findUnique({
             where: {
-                email: userEntity.user.email,
+                email: user.email,
             },
         });
 
-        if (!user) {
-            role = UserRole.ADMIN;
-            user = await this.prisma.admin.findUnique({
-                where: {
-                    email: userEntity.user.email,
-                },
-            });
-        }
-
-        if (!user) {
+        if (existingClient) {
             throw {
                 errors: [
                     {
-                        path: 'email',
-                        message: 'EMAIL_NOT_FOUND',
+                        field: 'email',
+                        message: USER_ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED,
                     },
                 ],
                 messages: [],
             };
         }
 
-        return {
-            ...user,
-            role,
-        };
+        await this.prisma.user
+            .create({
+                data: user,
+            })
+            .then(async (user) => {
+                await this.prisma.client.create({
+                    data: {
+                        user: {
+                            connect: {
+                                email: user.email,
+                            },
+                        },
+                    },
+                });
+            });
+
+        return user;
+    }
+
+    async loginUser({ user }: UserEntity) {
+        const loggedUser = await this.prisma.user.findUnique({
+            where: {
+                email: user.email,
+            },
+        });
+
+        if (!loggedUser) {
+            throw {
+                errors: [
+                    {
+                        field: 'email',
+                        message: USER_ERROR_MESSAGES.EMAIL_NOT_FOUND,
+                    },
+                ],
+                messages: [],
+            };
+        }
+
+        return loggedUser;
     }
 
     async getUserById(id: string) {
-        return this.prisma.client.findUnique({
+        return this.prisma.user.findUnique({
             where: {
                 id,
             },
