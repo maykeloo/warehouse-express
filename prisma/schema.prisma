@@ -10,41 +10,39 @@ generator client {
 enum Role {
   ADMIN
   CLIENT
+  EMPLOYEE
 }
 
-model Admin {
-  id        String      @id @default(uuid())
-  name      String?
-  email     String      @unique
-  password  String
-  role      Role       @default(ADMIN)
-  warehouse Warehouse[]
-}
-
-model Warehouseman {
-  id          String    @id @default(uuid())
-  name        String
-  email       String    @unique
-  password    String
-  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
-  warehouseId String
-}
-
-model Warehouse {
-  id           String         @id @default(uuid())
-  name         String
-  warehousemen Warehouseman[]
-  products     Product[]
-  admins       Admin[]
+model User {
+  id       String    @id @default(uuid())
+  name     String?
+  email    String    @unique
+  password String
+  role     Role      @default(CLIENT)
+  client   Client?
+  employee Employee?
 }
 
 model Client {
-  id       String  @id @default(uuid())
-  name     String?
-  email    String  @unique
-  password String
-  role     Role   @default(CLIENT)
-  orders   Order[]
+  id     String  @id @default(uuid())
+  user   User    @relation(fields: [userId], references: [id])
+  userId String  @unique
+  orders Order[]
+}
+
+model Employee {
+  id          String    @id @default(uuid())
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouseId String
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String    @unique
+}
+
+model Warehouse {
+  id        String     @id @default(uuid())
+  name      String
+  products  Product[]
+  employees Employee[]
 }
 
 model Product {
@@ -59,8 +57,8 @@ model Product {
 
 model Order {
   id        String    @id @default(uuid())
-  client    Client    @relation(fields: [clientId], references: [id])
-  clientId  String
+  client    Client?   @relation(fields: [clientId], references: [id])
+  clientId  String?
   userId    Int
   products  Product[]
   quantity  Int
