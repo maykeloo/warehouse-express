@@ -29,7 +29,7 @@ export class LoginUser {
             expiresIn: process.env.JWT_EXPIRATION,
         });
 
-        const refreshToken = jwt.sign({ id, email, role }, process.env.JWT_REFRESH_EXPIRATION as string, {
+        const refreshToken = jwt.sign({ id, email, role }, process.env.JWT_REFRESH_SECRET as string, {
             expiresIn: process.env.JWT_REFRESH_EXPIRATION,
         });
 

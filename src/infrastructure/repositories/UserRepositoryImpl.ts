@@ -1,6 +1,8 @@
 import { IUserRepository } from '@/application/interfaces/IUserRepository';
+import { userDto } from '@/domain/user/dto/user';
 import { UserEntity } from '@/domain/user/entities/User';
 import { USER_ERROR_MESSAGES } from '@/domain/user/messages';
+import { hashPassword } from '@/shared/utils/password';
 import { PrismaClient } from '@prisma/client';
 
 export class UserRepositoryImpl implements IUserRepository {
@@ -28,6 +30,8 @@ export class UserRepositoryImpl implements IUserRepository {
                 messages: [],
             };
         }
+
+        user.password = await hashPassword(user.password);
 
         await this.prisma.user
             .create({
@@ -71,10 +75,24 @@ export class UserRepositoryImpl implements IUserRepository {
     }
 
     async getUserById(id: string) {
-        return this.prisma.user.findUnique({
+        const user = await this.prisma.user.findUnique({
             where: {
                 id,
             },
         });
+
+        if (!user) {
+            throw {
+                errors: [
+                    {
+                        field: 'id',
+                        message: USER_ERROR_MESSAGES.USER_NOT_FOUND,
+                    },
+                ],
+                messages: [],
+            };
+        }
+
+        return userDto(user);
     }
 }

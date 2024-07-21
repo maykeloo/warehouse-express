@@ -11,5 +11,6 @@ const userController = new AuthController(userRepository);
 router.post('/register', (req, res) => userController.register(req, res));
 router.post('/login', (req, res) => userController.login(req, res));
 router.get('/data', (req, res) => userController.getData(req, res));
+router.post('/token', (req, res) => userController.refresh(req, res));
 
 export default router;

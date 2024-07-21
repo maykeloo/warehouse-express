@@ -5,12 +5,14 @@
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
+        "allowJs": true,
         "forceConsistentCasingInFileNames": true,
         "outDir": "./dist",
         "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"],
             "~/*": ["./*"]
-        }
+        },
+        "types": ["jest", "node"]
     }
 }
